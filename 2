@@ -44,6 +44,7 @@ if not fixture_pages:
     raise RuntimeError("No tables found on page")
 
 extracted = []
+sum = 0
 
 rows = []
 for fixture in fixture_pages:
@@ -85,6 +86,32 @@ for fixture in fixture_pages:
     # team_location = team.find_parent("tr").find("th").get_text()
 
 
+# print(rows)
+# extracted = []
+
+# for i, team_dict in enumerate(rows):
+#     for row in team_dict["rows"]:
+#         # print(f"Row: {row}")
+#         cells = row.find_all(["th", "td"])
+#         values = [c.get_text(" ") for c in cells]
+#         values.append(team_dict["team_location"])
+#         values.append(team_dict["team_name"])
+#         if not values:
+#             continue
+#
+#         if i == 0 and row.find_all("th"):
+#             headers = values
+#         else:
+#             extracted.append(values)
+
+# width = max(len(r) for r in extracted)
+# extracted = [r + [""] * (width - len(r)) for r in extracted]
+# df = pd.DataFrame(extracted, columns=[f"col_{i}" for i in range(width)])
+#
+# df.to_csv("data/fixtures.csv", index=False)
+# df.to_json("fixtures.json", orient="records", indent=2)
+
+print(sum)
 df = pd.DataFrame(extracted)
 df.to_csv("data/fixtures.csv", index=False)
 
