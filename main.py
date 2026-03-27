@@ -27,21 +27,39 @@ session.headers.update(
 # teams[0] = home, teams[1] = away
 
 
+def make_columns(
+    home_player, away_player, home_score, away_score, home_team, away_team, games
+):
+    row_dict["Home team"] = home_team
+    row_dict["Home Player"] = home_player
+    row_dict["N Games"] = home_score
+    row_dict["Away team"] = away_team
+    row_dict["Away Player"] = away_player
+    row_dict["O games"] = away_score
+    row_dict["Games"] = games
+    return row_dict
+    # row_dict["Result"] = (
+    # f"{cells[4].get_text(strip=True)} - {cells[5].get_text(strip=True)}"
+    # )
+
+
 resp = requests.get(URL, timeout=20)
 resp.raise_for_status()
 
 
 soup = BeautifulSoup(resp.text, "html.parser")
 
-
-def save_row(match_row):
-    pass
-
-
 # Find the biggest table on the page
 fixture_pages = soup.select('a[href*="fixtureid"]')
 if not fixture_pages:
     raise RuntimeError("No tables found on page")
+
+
+def check_walkover(home_player, away_player):
+    if home_player == "(walkover)" or away_player == "(walkover)":
+        return True
+    return False
+
 
 extracted = []
 
@@ -64,22 +82,35 @@ for fixture in fixture_pages:
         row_dict = {}
         cells = row.find_all("td")
         if row.select("td.matchplayer"):
+            games = cells[6].get_text(strip=True)
             home_player = cells[1].get_text(strip=True)
             away_player = cells[3].get_text(strip=True)
-            if first_part in home_team:
-                row_dict["Selected"] = home_player
-                row_dict["Opponent"] = away_player
-                row_dict["Result"] = (
-                    f"{cells[4].get_text(strip=True)} - {cells[5].get_text(strip=True)}"
-                )
-            if first_part in away_team:
-                row_dict["Selected"] = away_player
-                row_dict["Opponent"] = home_player
-                row_dict["Result"] = (
-                    f"{cells[5].get_text(strip=True)} - {cells[4].get_text(strip=True)}"
-                )
+            if check_walkover(home_player, away_player):
+                # row_dict = make_columns("(walkover)", "(walkover)", "0", "0", games)
+                home_player = "(walkover)"
+                away_player = "(walkover)"
+                # row_dict["Newcastle"] = "(walkover)"
+                # row_dict["Other"] = "(walkover)"
+            row_dict = make_columns(
+                home_player,
+                away_player,
+                cells[4].get_text(strip=True),
+                cells[5].get_text(strip=True),
+                home_team,
+                away_team,
+                games,
+            )
+            # row_dict["Newcastle"] = home_player
+            # row_dict["Other"] = away_player
+            # row_dict["Result"] = (
+            #     f"{cells[4].get_text(strip=True)} - {cells[5].get_text(strip=True)}"
+            # )
+            # row_dict["Newcastle"] = away_player
+            # row_dict["Other"] = home_player
+            # row_dict["Result"] = (
+            #     f"{cells[5].get_text(strip=True)} - {cells[4].get_text(strip=True)}"
+            # )
 
-            row_dict["Games"] = cells[6].get_text(strip=True)
             extracted.append(row_dict)
     # team = fixture_soup.find(name="a", string=re.compile("Newcastle University.*"))
     # team_location = team.find_parent("tr").find("th").get_text()
