@@ -72,43 +72,62 @@ def scrape_fixtures(url: str) -> list[dict]:
 
     extracted = []
     for fixture in fixture_links:
-        logger.debug("Fetching fixture: %s", fixture["href"])
+        fixture_url = urljoin(url, fixture["href"])  # pyright: ignore[reportArgumentType]
         try:
-            r = session.get(urljoin(url, fixture["href"]), timeout=20)  # pyright: ignore[reportArgumentType]
-        except requests.RequestException as e:
-            logging.error("Request failed for %s: %s", url, e)
-
-        r.raise_for_status()
-        fixture_soup = BeautifulSoup(r.text, "html.parser")
-
-        teams = fixture_soup.select('a[href*="showteam?teamid"]')
-        home_team = teams[0].get_text(strip=True)
-        away_team = teams[1].get_text(strip=True)
-
-        logger.debug("Processing fixture: %s vs %s", home_team, away_team)
-
-        for row in fixture_soup.select("tr.firstRow, tr.secondRow"):
-            cells = row.find_all("td")
-            if not row.select("td.matchplayer"):
+            logger.debug("Fetching fixture: %s", fixture_url)
+            try:
+                r = session.get(fixture_url, timeout=20)
+            except requests.RequestException as e:
+                logging.error("Request failed for %s: %s", fixture_url, e)
                 continue
 
-            home_player = cells[1].get_text(strip=True)
-            away_player = cells[3].get_text(strip=True)
-            if is_walkover(home_player, away_player):
-                home_player = "(walkover)"
-                away_player = "(walkover)"
+            r.raise_for_status()
+            fixture_soup = BeautifulSoup(r.text, "html.parser")
 
-            extracted.append(
-                {
-                    "Home Team": home_team,
-                    "Home Player": home_player,
-                    "Home Games": cells[4].get_text(strip=True),
-                    "Away Team": away_team,
-                    "Away Player": away_player,
-                    "Away Games": cells[5].get_text(strip=True),
-                    "Games": cells[6].get_text(strip=True),
-                }
-            )
+            teams = fixture_soup.select('a[href*="showteam?teamid"]')
+            if len(teams) < 2:
+                logger.warning(
+                    "Expected 2+ team links in %s, got %d — skipping", fixture_url, len(teams)
+                )
+                continue
+
+            home_team = teams[0].get_text(strip=True)
+            away_team = teams[1].get_text(strip=True)
+
+            logger.debug("Processing fixture: %s vs %s", home_team, away_team)
+
+            for row in fixture_soup.select("tr.firstRow, tr.secondRow"):
+                cells = row.find_all("td")
+                if not row.select("td.matchplayer"):
+                    continue
+                if len(cells) < 7:
+                    logger.warning(
+                        "Row in %s vs %s has only %d cells — skipping row",
+                        home_team,
+                        away_team,
+                        len(cells),
+                    )
+                    continue
+
+                home_player = cells[1].get_text(strip=True)
+                away_player = cells[3].get_text(strip=True)
+                if is_walkover(home_player, away_player):
+                    home_player = "(walkover)"
+                    away_player = "(walkover)"
+
+                extracted.append(
+                    {
+                        "Home Team": home_team,
+                        "Home Player": home_player,
+                        "Home Games": cells[4].get_text(strip=True),
+                        "Away Team": away_team,
+                        "Away Player": away_player,
+                        "Away Games": cells[5].get_text(strip=True),
+                        "Games": cells[6].get_text(strip=True),
+                    }
+                )
+        except Exception as e:
+            logger.warning("Skipping fixture %s: %s", fixture_url, e)
 
     return extracted
 
