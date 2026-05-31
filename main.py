@@ -91,6 +91,6 @@ if __name__ == "__main__":
     print(f"Saved {args.output}")
 
     if args.count:
-        player_counts = count_matches.get_newcastle_university_player_count(df)
+        player_counts = count_matches.get_player_count(df)
         player_counts.to_csv("data/match_counts.csv", index=False)
         print("Saved match_counts.csv")

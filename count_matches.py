@@ -1,19 +1,23 @@
 import pandas as pd
 
 
-# Only count Newcastle University players, excluding walkovers
-def get_newcastle_university_player_count(df):
-
-    home = df[
-        (df["Home Team"].str.contains("Newcastle University", na=False))
+def get_player_count(df, team="Newcastle University"):
+    involved = df[
+        (df["Home Team"].str.contains(team, na=False) | df["Away Team"].str.contains(team, na=False))
         & (df["Home Player"] != "(walkover)")
-    ]["Home Player"]
-    away = df[
-        (df["Away Team"].str.contains("Newcastle University", na=False))
         & (df["Away Player"] != "(walkover)")
-    ]["Away Player"]
+    ]
 
-    counts = pd.concat([home, away]).value_counts().reset_index()
-    counts.columns = ["Player", "Matches Played"]
+    home = involved[["Home Player", "Home Team"]].rename(columns={"Home Player": "Player", "Home Team": "Team"})
+    away = involved[["Away Player", "Away Team"]].rename(columns={"Away Player": "Player", "Away Team": "Team"})
+
+    counts = (
+        pd.concat([home, away])
+        .groupby(["Player", "Team"])
+        .size()
+        .reset_index(name="Matches Played")
+        .sort_values("Matches Played", ascending=False)
+        .reset_index(drop=True)
+    )
 
     return counts
