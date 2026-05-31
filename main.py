@@ -43,7 +43,8 @@ def scrape_fixtures(url: str) -> list[dict]:
     resp = session.get(url, timeout=20)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
-
+    with open("file.html", "w") as file:
+        file.write(resp.text)
     fixture_links = soup.select('a[href*="fixtureid"]')
     if not fixture_links:
         raise RuntimeError("No fixture links found on page")
@@ -91,6 +92,8 @@ if __name__ == "__main__":
     print(f"Saved {args.output}")
 
     if args.count:
-        player_counts = count_matches.get_player_count(df)
+        player_counts = count_matches.get_player_count(
+            df,
+        )
         player_counts.to_csv("data/match_counts.csv", index=False)
         print("Saved match_counts.csv")
