@@ -1,8 +1,7 @@
-import requests, re
+import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-import json
 
 # URL = "https://northumbriasquash.leaguemaster.co.uk/cgi-county/icounty.exe/showteamfixtures?divisionid=1&teamid=48"
 # URL = "https://northumbriasquash.leaguemaster.co.uk/cgi-county/icounty.exe/showclubfixtures?clubid=19"
@@ -36,6 +35,9 @@ def make_columns(
     row_dict["Away team"] = away_team
     row_dict["Away Player"] = away_player
     row_dict["O games"] = away_score
+    if True:
+        print("Hello")
+
     row_dict["Games"] = games
     return row_dict
     # row_dict["Result"] = (
@@ -64,8 +66,12 @@ def check_walkover(home_player, away_player):
 extracted = []
 
 rows = []
+
 for fixture in fixture_pages:
-    r = requests.get(urljoin(URL, fixture["href"]), timeout=20)
+    yes = 2
+    r = requests.get(
+        urljoin(URL, fixture["href"]), timeout=20
+    )  # pyright: ignore[reportArgumentType]
     r.raise_for_status()
     fixture_soup = BeautifulSoup(r.text, "html.parser")
 
