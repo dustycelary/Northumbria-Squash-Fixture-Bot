@@ -1,5 +1,3 @@
-TODO: Make scripts configurable (no hard‑coded team names or URLs).
-TODO: Add CLI arguments (argparse) and document them.
 TODO: Add logging and explicit error messages for bad URLs or parsing failures.
 TODO: Add basic tests (pytest) for parsing and CSV outputs.
 TODO: Add formatting/linting (black + ruff) and wire them into CI.
@@ -14,6 +12,11 @@ TODO: Retries + timeout for HTTP requests.
 TODO: Deterministic output: stable column order, consistent naming.
 TODO: Optional JSON output alongside CSV.
 TODO: Config file support (YAML/JSON) for repeat runs.
+
+## done
+
+DONE: Make scripts configurable (no hard‑coded team names or URLs).
+done: Add CLI arguments (argparse) and document them.
 
 ## ideas
 
