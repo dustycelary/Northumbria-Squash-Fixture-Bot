@@ -5,11 +5,11 @@ import pandas as pd
 def get_newcastle_university_player_count(df):
 
     home = df[
-        (df["Home team"].str.contains("Newcastle University", na=False))
+        (df["Home Team"].str.contains("Newcastle University", na=False))
         & (df["Home Player"] != "(walkover)")
     ]["Home Player"]
     away = df[
-        (df["Away team"].str.contains("Newcastle University", na=False))
+        (df["Away Team"].str.contains("Newcastle University", na=False))
         & (df["Away Player"] != "(walkover)")
     ]["Away Player"]
 

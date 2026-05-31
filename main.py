@@ -27,7 +27,20 @@ def is_walkover(home_player: str, away_player: str) -> bool:
 
 
 def scrape_fixtures(url: str) -> list[dict]:
-    resp = requests.get(url, timeout=20)
+    session = requests.Session()
+    session.headers.update(
+        {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36"
+        }
+    )
+    session.cookies.update(
+        {
+            "Competition": "332",
+            "CookieID": "328645322",
+            "Owner": "LeagueMaster",
+        }
+    )
+    resp = session.get(url, timeout=20)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -37,7 +50,7 @@ def scrape_fixtures(url: str) -> list[dict]:
 
     extracted = []
     for fixture in fixture_links:
-        r = requests.get(urljoin(url, fixture["href"]), timeout=20)  # pyright: ignore[reportArgumentType]
+        r = session.get(urljoin(url, fixture["href"]), timeout=20)  # pyright: ignore[reportArgumentType]
         r.raise_for_status()
         fixture_soup = BeautifulSoup(r.text, "html.parser")
 
