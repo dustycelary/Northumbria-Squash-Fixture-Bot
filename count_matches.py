@@ -1,7 +1,5 @@
 import pandas as pd
 
-df = pd.read_csv("data/fixtures.csv")
-
 
 # Only count Newcastle University players, excluding walkovers
 def get_newcastle_university_player_count(df):
@@ -19,9 +17,3 @@ def get_newcastle_university_player_count(df):
     counts.columns = ["Player", "Matches Played"]
 
     return counts
-
-
-counts = get_newcastle_university_player_count(df)
-
-counts.to_csv("data/match_counts.csv", index=False)
-print("Saved match_counts.csv")

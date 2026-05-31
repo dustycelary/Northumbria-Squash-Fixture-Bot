@@ -5,6 +5,8 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
+import count_matches
+
 parser = argparse.ArgumentParser(description="Scrape northumbria squash fixtures")
 parser.add_argument(
     "--url",
@@ -12,6 +14,12 @@ parser.add_argument(
     help="fixture overview page url",
 )
 parser.add_argument("--output", default="data/fixtures.csv", help="Output CSV path")
+parser.add_argument(
+    "--count",
+    action=argparse.BooleanOptionalAction,
+    default=False,
+    help="Enable second file containing amount players have played",
+)
 
 
 def is_walkover(home_player: str, away_player: str) -> bool:
@@ -48,15 +56,17 @@ def scrape_fixtures(url: str) -> list[dict]:
                 home_player = "(walkover)"
                 away_player = "(walkover)"
 
-            extracted.append({
-                "Home Team": home_team,
-                "Home Player": home_player,
-                "Home Games": cells[4].get_text(strip=True),
-                "Away Team": away_team,
-                "Away Player": away_player,
-                "Away Games": cells[5].get_text(strip=True),
-                "Games": cells[6].get_text(strip=True),
-            })
+            extracted.append(
+                {
+                    "Home Team": home_team,
+                    "Home Player": home_player,
+                    "Home Games": cells[4].get_text(strip=True),
+                    "Away Team": away_team,
+                    "Away Player": away_player,
+                    "Away Games": cells[5].get_text(strip=True),
+                    "Games": cells[6].get_text(strip=True),
+                }
+            )
 
     return extracted
 
@@ -66,3 +76,8 @@ if __name__ == "__main__":
     df = pd.DataFrame(scrape_fixtures(args.url))
     df.to_csv(args.output, index=False)
     print(f"Saved {args.output}")
+
+    if args.count:
+        player_counts = count_matches.get_newcastle_university_player_count(df)
+        player_counts.to_csv("data/match_counts.csv", index=False)
+        print("Saved match_counts.csv")

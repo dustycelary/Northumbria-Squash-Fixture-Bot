@@ -36,6 +36,7 @@ Note: countMatches.py is currently hard‑coded to “Newcastle University”.
 
 - `--url`: the url of the the fixture overview page that you wish to scrape from.
 - `--output`: the file that you wish to output the results to.
+- `--counnt`: determines whether to save the number of times each player has played
 
 ## Design notes
 
