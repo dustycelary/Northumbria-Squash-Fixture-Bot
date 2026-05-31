@@ -9,17 +9,18 @@ from bs4 import BeautifulSoup
 
 import count_matches
 
-logging.basicConfig(
-    level=logging.INFO, format="%(levelname)s: %(message)s", stream=sys.stdout
-)
-logger = logging.getLogger(__name__)
-
-
 parser = argparse.ArgumentParser(description="Scrape northumbria squash fixtures")
 parser.add_argument(
     "--url",
     default="https://northumbriasquash.leaguemaster.co.uk/cgi-county/icounty.exe/showteamfixtures?divisionid=1&teamid=48",
     help="fixture overview page url",
+)
+parser.add_argument(
+    "--verbose",
+    "-v",
+    action=argparse.BooleanOptionalAction,
+    default=False,
+    help="Enable debug logging",
 )
 parser.add_argument("--output", default="data/fixtures.csv", help="Output CSV path")
 parser.add_argument(
@@ -28,6 +29,11 @@ parser.add_argument(
     default=False,
     help="Enable second file containing amount players have played",
 )
+
+logging.basicConfig(
+    level=logging.INFO, format="%(levelname)s: %(message)s", stream=sys.stdout
+)
+logger = logging.getLogger(__name__)
 
 
 def is_walkover(home_player: str, away_player: str) -> bool:
@@ -53,6 +59,7 @@ def scrape_fixtures(url: str) -> list[dict]:
         resp = session.get(url, timeout=20)
     except requests.RequestException as e:
         logging.error("Request failed for %s: %s", url, e)
+
     resp.raise_for_status()
     logger.debug("Got %d bytes from fixture list page", len(resp.content))
     soup = BeautifulSoup(resp.text, "html.parser")
@@ -108,6 +115,10 @@ def scrape_fixtures(url: str) -> list[dict]:
 
 if __name__ == "__main__":
     args = parser.parse_args()
+
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+
     df = pd.DataFrame(scrape_fixtures(args.url))
     df.to_csv(args.output, index=False)
     logger.info("Saved %d rows to %s", len(df), args.output)
