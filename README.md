@@ -32,7 +32,12 @@ This writes data/fixtures.csv.
 This writes data/match_counts.csv.
 Note: countMatches.py is currently hard‑coded to “Newcastle University”.
 
-Design notes
+## Arguments
+
+- `--url`: the url of the the fixture overview page that you wish to scrape from.
+- `--output`: the file that you wish to output the results to.
+
+## Design notes
 
 - The script asks for a Northumbria Squash fixture overview URL (team or club page).
 - It fetches the overview page, collects all fixtureid links, and visits each fixture.

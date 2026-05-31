@@ -1,11 +1,20 @@
-import requests
-import pandas as pd
-from bs4 import BeautifulSoup
+import argparse
 from urllib.parse import urljoin
 
-# URL = "https://northumbriasquash.leaguemaster.co.uk/cgi-county/icounty.exe/showteamfixtures?divisionid=1&teamid=48"
-# URL = "https://northumbriasquash.leaguemaster.co.uk/cgi-county/icounty.exe/showclubfixtures?clubid=19"
-URL = input("Whats the URL of the fixture overview page?: ")
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+
+parser = argparse.ArgumentParser(description="Scrape northumbria squash fixtures")
+parser.add_argument(
+    "--url",
+    default="https://northumbriasquash.leaguemaster.co.uk/cgi-county/icounty.exe/showteamfixtures?divisionid=1&teamid=48",
+    help="fixture overview page url",
+)
+parser.add_argument("--output", default="data/fixtures.csv", help="Output CSV path")
+args = parser.parse_args()
+
+# URL = input("Whats the URL of the fixture overview page?: ")
 session = requests.Session()
 session.headers.update(
     {
@@ -45,7 +54,7 @@ def make_columns(
     # )
 
 
-resp = requests.get(URL, timeout=20)
+resp = requests.get(args.url, timeout=20)
 resp.raise_for_status()
 
 
@@ -69,9 +78,7 @@ rows = []
 
 for fixture in fixture_pages:
     yes = 2
-    r = requests.get(
-        urljoin(URL, fixture["href"]), timeout=20
-    )  # pyright: ignore[reportArgumentType]
+    r = requests.get(urljoin(args.url, fixture["href"]), timeout=20)  # pyright: ignore[reportArgumentType]
     r.raise_for_status()
     fixture_soup = BeautifulSoup(r.text, "html.parser")
 
@@ -123,6 +130,6 @@ for fixture in fixture_pages:
 
 
 df = pd.DataFrame(extracted)
-df.to_csv("data/fixtures.csv", index=False)
+df.to_csv(args.output, index=False)
 
 print("Saved fixtures.csv")
