@@ -9,7 +9,8 @@ def get_player_count(df: pd.DataFrame) -> pd.DataFrame:
     """Count matches played per player across home and away appearances.
 
     Args:
-        df: DataFrame with columns 'Home Player', 'Home Team', 'Away Player', 'Away Team'.
+        df: DataFrame with columns 'Home Player', 'Home Team',
+            'Away Player', 'Away Team'.
 
     Returns:
         DataFrame with columns 'Player', 'Team', 'Matches Played', sorted descending.

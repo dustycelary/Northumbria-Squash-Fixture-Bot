@@ -5,4 +5,3 @@ class Player:
         self.games_won = 0
         self.matches_won = 0
         self.fixtures = []  # make this of class Fixture (add all the data in).wk
-

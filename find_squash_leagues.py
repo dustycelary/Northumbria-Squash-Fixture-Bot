@@ -44,7 +44,8 @@ def fetch_crtsh():
 
 def is_squash_league(subdomain):
     """
-    Return (subdomain, title_or_None) — title is set if the page looks like a squash league.
+    Return (subdomain, title_or_None) — title is set if the page looks like
+    a squash league.
     """
     url = f"https://{subdomain}/"
     try:

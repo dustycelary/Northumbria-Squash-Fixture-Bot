@@ -16,13 +16,16 @@ If a user wishes to narrow the search to a single team they should provide a URL
 - **requests** for HTTP fetching
 - **beautifulsoup4** for HTML parsing
 - **pandas** for CSV output and aggregation
+- **ruff** for linting and formatting (dev)
 
 ## How to run
 
 1. Create and activate a virtual environment
     ```python3 -m venv .venv```
 2. Install dependencies:
-    ```bash pip install -r requirements.txt```
+    ```pip install .```
+    For development (includes ruff):
+    ```pip install -e ".[dev]"```
 
 3. Run the scraper and paste a fixture URL when prompted:
     ```python3 main.py```
@@ -31,6 +34,16 @@ This writes data/fixtures.csv.
     ```python3 countMatches.py```
 This writes data/match_counts.csv.
 Note: countMatches.py is currently hard‑coded to “Newcastle University”.
+
+## Linting
+
+This project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting.
+
+```bash
+ruff check .          # lint
+ruff check --fix .    # lint and auto-fix
+ruff format .         # format
+```
 
 ## Arguments
 

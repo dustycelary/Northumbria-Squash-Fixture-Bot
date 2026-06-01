@@ -44,7 +44,10 @@ def scrape_fixtures(url: str) -> list[dict]:
     session = requests.Session()
     session.headers.update(
         {
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36"
+            "User-Agent": (
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+                " (KHTML, like Gecko) Chrome/122.0 Safari/537.36"
+            )
         }
     )
     session.cookies.update(
@@ -87,7 +90,9 @@ def scrape_fixtures(url: str) -> list[dict]:
             teams = fixture_soup.select('a[href*="showteam?teamid"]')
             if len(teams) < 2:
                 logger.warning(
-                    "Expected 2+ team links in %s, got %d — skipping", fixture_url, len(teams)
+                    "Expected 2+ team links in %s, got %d — skipping",
+                    fixture_url,
+                    len(teams),
                 )
                 continue
 
