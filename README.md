@@ -33,7 +33,7 @@ This writes data/fixtures.csv.
 4. Generate match counts from the fixtures CSV:
     ```python3 countMatches.py```
 This writes data/match_counts.csv.
-Note: countMatches.py is currently hard‑coded to “Newcastle University”.
+Note: countMatches.py is currently hard‑coded to "Newcastle University".
 
 ## Linting
 
@@ -51,6 +51,41 @@ ruff format .         # format
 - `--output`: the file that you wish to output the results to.
 - `--count`: determines whether to save the number of times each player has played
 - `--verbose`: Enable logging for debug level messages
+
+## Code conventions
+
+### Naming (PEP 8)
+
+| Thing           | Style                 | Example                  |
+|-----------------|-----------------------|--------------------------|
+| Variables       | `snake_case`          | `home_player`            |
+| Functions       | `snake_case`          | `scrape_fixtures()`      |
+| Classes         | `PascalCase`          | `Player`                 |
+| Constants       | `UPPER_SNAKE_CASE`    | `MAX_RETRIES`            |
+| Modules / files | `snake_case`          | `count_matches.py`       |
+| Private members | `_leading_underscore` | `_internal_helper()`     |
+
+### Git branches
+
+| Prefix   | When to use                       |
+|----------|-----------------------------------|
+| `feat/`  | New feature                       |
+| `fix/`   | Bug fix                           |
+| `chore/` | Maintenance, dependencies, config |
+| `docs/`  | Documentation only                |
+
+Example: `feat/add-player-stats`
+
+### Git commits
+
+[Conventional Commits](https://www.conventionalcommits.org) style:
+
+```
+feat: add match history export
+fix: handle missing player cell in fixture row
+chore: add ruff to CI workflow
+docs: document --count argument
+```
 
 ## Design notes
 
