@@ -3,11 +3,13 @@ name: LeagueMaster bot
 on:
   push:
   pull_request:
-
   workflow_dispatch:
 
 permissions:
   contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,9 +30,7 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip 
-          pip install -e ".[dev]"
+        run: pip install ruff
 
       - name: Ruff linting
         run: |
