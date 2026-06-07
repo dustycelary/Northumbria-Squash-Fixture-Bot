@@ -11,8 +11,12 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["ruff", "pytest", "pytest-recording"]
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 
 [tool.ruff]
 line-length = 88
