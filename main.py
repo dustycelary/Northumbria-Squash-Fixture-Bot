@@ -13,11 +13,6 @@ from league_searcher import get_areas
 
 parser = argparse.ArgumentParser(description="Scrape northumbria squash fixtures")
 parser.add_argument(
-    "--url",
-    default="https://northumbriasquash.leaguemaster.co.uk/cgi-county/icounty.exe/showteamfixtures?divisionid=1&teamid=48",
-    help="fixture overview page url",
-)
-parser.add_argument(
     "--verbose",
     "-v",
     action=argparse.BooleanOptionalAction,

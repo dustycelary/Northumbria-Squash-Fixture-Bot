@@ -35,6 +35,28 @@ This writes data/fixtures.csv.
 This writes data/match_counts.csv.
 Note: countMatches.py is currently hard‑coded to "Newcastle University".
 
+## Testing
+
+Install dev dependencies (includes pytest and pytest-recording):
+
+```bash
+pip install -e ".[dev]"
+```
+
+Run the test suite:
+
+```bash
+pytest
+```
+
+Tests run automatically on every push and pull request via GitHub Actions. Tests use [pytest-recording](https://github.com/kiwicom/pytest-recording) (VCR.py) to replay saved HTTP responses from `tests/cassettes/` — no network access needed. If the leaguemaster site changes its HTML structure, re-record with:
+
+```bash
+pytest tests/test_main.py --record-mode=new_episodes
+```
+
+Then commit the updated cassette files.
+
 ## Linting
 
 This project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting.

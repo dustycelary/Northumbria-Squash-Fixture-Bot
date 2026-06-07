@@ -1,0 +1,40 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.31.0
+    method: GET
+    uri: https://northumbriasquash.leaguemaster.co.uk/cgi-county/icounty.exe/showleaguelist
+  response:
+    body:
+      string: |
+        <html>
+        <head><title>Northumbria Squash - Select Competition</title></head>
+        <body>
+        <form method="get" action="/cgi-county/icounty.exe/changecompetition">
+        <select name="compid">
+          <option value="">Select competition...</option>
+          <option value="310">Men's Winter 2022/23</option>
+          <option value="320">Men's Winter 2023/24</option>
+          <option value="331">Men's Winter 2024/25</option>
+          <option value="332">Men's Winter 2025/26</option>
+          <option value="333">Ladies Winter 2025/26</option>
+        </select>
+        <input type="submit" value="Go">
+        </form>
+        </body>
+        </html>
+    headers:
+      Content-Type:
+      - text/html; charset=utf-8
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,46 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.31.0
+    method: GET
+    uri: https://northumbriasquash.leaguemaster.co.uk/cgi-county/icounty.exe/showdivlist
+  response:
+    body:
+      string: |
+        <html>
+        <head><title>Northumbria Squash - Division List</title></head>
+        <body>
+        <table>
+          <tr>
+            <td><a href="https://yorkshiresquash.leaguemaster.co.uk/cgi-county/icounty.exe/showdivfixtures?divisionid=10">Division 1</a></td>
+            <td>8 teams</td>
+            <td>Active</td>
+          </tr>
+          <tr>
+            <td><a href="https://yorkshiresquash.leaguemaster.co.uk/cgi-county/icounty.exe/showdivfixtures?divisionid=11">Division 2</a></td>
+            <td>8 teams</td>
+            <td>Active</td>
+          </tr>
+          <tr>
+            <td><a href="https://yorkshiresquash.leaguemaster.co.uk/cgi-county/icounty.exe/showdivfixtures?divisionid=12">Division 3</a></td>
+            <td>6 teams</td>
+            <td>Active</td>
+          </tr>
+        </table>
+        </body>
+        </html>
+    headers:
+      Content-Type:
+      - text/html; charset=utf-8
+    status:
+      code: 200
+      message: OK
+version: 1
