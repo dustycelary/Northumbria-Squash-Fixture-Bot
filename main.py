@@ -1,14 +1,15 @@
 import argparse
 import logging
 import sys
-from urllib.parse import urljoin
+import time
+from urllib.parse import urljoin, urlparse
 
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
 import count_matches
-from league_searcher import get_target_areas, get_target_leagues
+from league_searcher import get_areas
 
 parser = argparse.ArgumentParser(description="Scrape northumbria squash fixtures")
 parser.add_argument(
@@ -22,6 +23,12 @@ parser.add_argument(
     action=argparse.BooleanOptionalAction,
     default=False,
     help="Enable debug logging",
+)
+parser.add_argument(
+    "--test",
+    action=argparse.BooleanOptionalAction,
+    default=False,
+    help="Enable test mode",
 )
 parser.add_argument("--output", default="data/fixtures.csv", help="Output CSV path")
 parser.add_argument(
@@ -41,17 +48,33 @@ def is_walkover(home_player: str, away_player: str) -> bool:
     return home_player == "(walkover)" or away_player == "(walkover)"
 
 
-def select_league(session: requests.Session, base_url: str, league_id: str) -> None:
-    """Setting session cookie so it gets data from the correct league"""
-
+def get_competition_id(
+    session: requests.Session, base_url: str, league_name: str
+) -> int:
+    """Look up the numeric compid for a league name string."""
     base_url = base_url.rstrip("/")
-    resp = session.post(
-        f"{base_url}/selectleague",
-        data={"leagueid": league_id},
-        allow_redirects=True,
+    resp = session.get(f"{base_url}/showleaguelist", timeout=20)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    for opt in soup.find_all("option"):
+        if opt.get_text(strip=True).lower() == league_name.lower():
+            return int(opt["value"])
+    available = [opt.get_text(strip=True) for opt in soup.find_all("option")]
+    raise ValueError(
+        f"League {league_name!r} not found at {base_url}. Available: {available}"
+    )
+
+
+def select_competition(session: requests.Session, base_url: str, comp_id: int) -> None:
+    """Select a competition by numeric ID via the changecompetition endpoint."""
+    base_url = base_url.rstrip("/")
+    resp = session.get(
+        f"{base_url}/changecompetition",
+        params={"compid": comp_id},
+        timeout=20,
     )
     resp.raise_for_status()
-    return resp
+    logger.debug("select_competition compid=%s final URL: %s", comp_id, resp.url)
 
 
 def get_division_list(session: requests.Session, league_url: str) -> list[dict]:
@@ -75,10 +98,15 @@ def get_division_list(session: requests.Session, league_url: str) -> list[dict]:
         if len(cells) < 3:
             continue
 
+        # Strip the host from the href and re-join with base_url so we always
+        # hit the correct area's server, not whatever domain the page linked to.
+        href = a["href"]
+        parsed = urlparse(href)
+        path_only = parsed.path + (f"?{parsed.query}" if parsed.query else "")
         divisions.append(
             {
                 "division": cells[0].get_text(strip=True),
-                "fixture_url": urljoin(base_url, a["href"]),
+                "fixture_url": urljoin(base_url, path_only),
             }
         )
 
@@ -89,7 +117,6 @@ def scrape_fixtures(
     session: requests.Session, url: str, area: str, division: str, league: str
 ) -> list[dict]:
     """url should be of the fixture page"""
-    logger.info("Fetching fixture list from %s", url)
     try:
         resp = session.get(url, timeout=20)
     except requests.RequestException as e:
@@ -175,38 +202,48 @@ def scrape_fixtures(
 
 
 if __name__ == "__main__":
-    session = requests.Session()
     all_rows = []
     args = parser.parse_args()
-    for league in get_target_leagues():
-        for area in get_target_areas():
-            resp = select_league(session, area, league)
-            divisions = get_division_list(session, area)
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+    for area in get_areas():
+        for comp_name in area["competitions"]:
+            session = requests.Session()
+            try:
+                comp_id = get_competition_id(session, area["url"], comp_name)
+            except ValueError as e:
+                logger.warning(e)
+                continue
+            logger.info(
+                "Resolved %r -> compid=%s (%s)", comp_name, comp_id, area["name"]
+            )
+            select_competition(session, area["url"], comp_id)
+            divisions = get_division_list(session, area["url"])
             if not divisions:
                 logger.warning(
-                    "No divisions found for league %s at %s - skipping", league, area
+                    "No divisions found for compid=%s at %s - skipping",
+                    comp_id,
+                    area["url"],
                 )
                 continue
             for division in divisions:
+                logger.info("Fetching fixture list from %s", division["fixture_url"])
+                if args.test:
+                    continue
                 rows = scrape_fixtures(
                     session,
                     division["fixture_url"],
-                    area,
+                    area["name"],
                     division["division"],
-                    league,
+                    comp_name,
                 )
-
                 all_rows.extend(rows)
-                # for result in scrape_fixtures(team["ixture_url"]):
-                # results["area"] = area
-                # results["league"] = league
+                time.sleep(1)
 
-    if args.verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
-
-    df = pd.DataFrame(all_rows)
-    df.to_csv(args.output, index=False)
-    logger.info("Saved %d rows to %s", len(df), args.output)
+    if not args.test:
+        df = pd.DataFrame(all_rows)
+        df.to_csv(args.output, index=False)
+        logger.info("Saved %d rows to %s", len(df), args.output)
 
     if args.count:
         player_counts = count_matches.get_player_count(

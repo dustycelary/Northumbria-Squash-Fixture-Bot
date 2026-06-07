@@ -51,6 +51,7 @@ ruff format .         # format
 - `--output`: the file that you wish to output the results to.
 - `--count`: determines whether to save the number of times each player has played
 - `--verbose`: Enable logging for debug level messages
+- `--test`: Enable test mode to not fetch each url individually
 
 ## Code conventions
 

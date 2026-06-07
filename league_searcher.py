@@ -1,21 +1,12 @@
 import json
 
 
-def get_target_areas():
+def get_areas() -> list[dict]:
+    """Return list of area dicts with keys: name, url, competitions."""
     try:
-        with open("./data/target-leagues.json") as league_file:
-            league_area = json.loads(league_file.read())
+        with open("./data/target-leagues.json") as f:
+            data = json.loads(f.read())
     except FileNotFoundError as e:
         print(e)
         raise
-    return league_area["league-link"]
-
-
-def get_target_leagues():
-    try:
-        with open("./data/target-leagues.json") as league_file:
-            leagues = json.loads(league_file.read())
-    except FileNotFoundError as e:
-        print(e)
-        raise
-    return leagues["target-leagues"]
+    return data["areas"]
