@@ -47,11 +47,29 @@ ruff format .         # format
 
 ## Arguments
 
-- `--url`: the url of the the fixture overview page that you wish to scrape from.
 - `--output`: the file that you wish to output the results to.
 - `--count`: determines whether to save the number of times each player has played
 - `--verbose`: Enable logging for debug level messages
 - `--test`: Enable test mode to not fetch each url individually
+
+## Configuration
+
+### target-leagues.json
+
+This files determines what geographical area will be scraped, what and what leagues will be searched, it's structure is:
+
+```
+
+{
+  "areas": [
+    {
+      "name": area name e.g. "yorkshire",
+      "url": area home page link e.g. "https://yorkshiresquash.leaguemaster.co.uk/cgi-county/icounty.exe",
+      "competitions": [] the name of league to search e.g. ["Winter League 2024/25"] 
+    },
+  ]
+}
+```
 
 ## Code conventions
 
