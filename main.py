@@ -8,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import count_matches
+from league_searcher import get_target_areas, get_target_leagues
 
 parser = argparse.ArgumentParser(description="Scrape northumbria squash fixtures")
 parser.add_argument(
@@ -40,23 +41,54 @@ def is_walkover(home_player: str, away_player: str) -> bool:
     return home_player == "(walkover)" or away_player == "(walkover)"
 
 
-def scrape_fixtures(url: str) -> list[dict]:
-    session = requests.Session()
-    session.headers.update(
-        {
-            "User-Agent": (
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
-                " (KHTML, like Gecko) Chrome/122.0 Safari/537.36"
-            )
-        }
+def select_league(session: requests.Session, base_url: str, league_id: str) -> None:
+    """Setting session cookie so it gets data from the correct league"""
+
+    base_url = base_url.rstrip("/")
+    resp = session.post(
+        f"{base_url}/selectleague",
+        data={"leagueid": league_id},
+        allow_redirects=True,
     )
-    session.cookies.update(
-        {
-            "Competition": "332",
-            "CookieID": "328645322",
-            "Owner": "LeagueMaster",
-        }
-    )
+    resp.raise_for_status()
+    return resp
+
+
+def get_division_list(session: requests.Session, league_url: str) -> list[dict]:
+    base_url = league_url.rstrip("/")
+    team_list_url = f"{base_url}/showdivlist"
+    resp = session.get(team_list_url)
+
+    resp.raise_for_status()
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+    divisions = []
+
+    for a in soup.find_all("a", href=True):
+        if "showdivfixtures" not in a["href"]:
+            continue
+        tr = a.find_parent("tr")
+        if not tr:
+            continue
+
+        cells = tr.find_all("td")
+        if len(cells) < 3:
+            continue
+
+        divisions.append(
+            {
+                "division": cells[0].get_text(strip=True),
+                "fixture_url": urljoin(base_url, a["href"]),
+            }
+        )
+
+    return divisions
+
+
+def scrape_fixtures(
+    session: requests.Session, url: str, area: str, division: str, league: str
+) -> list[dict]:
+    """url should be of the fixture page"""
     logger.info("Fetching fixture list from %s", url)
     try:
         resp = session.get(url, timeout=20)
@@ -67,7 +99,9 @@ def scrape_fixtures(url: str) -> list[dict]:
     logger.debug("Got %d bytes from fixture list page", len(resp.content))
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    fixture_links = soup.select('a[href*="fixtureid"]')
+    fixture_links = soup.select(
+        'a[href*="fixtureid"]'
+    )  # returns all the links to individual fixtures
     if not fixture_links:
         raise RuntimeError("No fixture links found on page")
 
@@ -129,6 +163,9 @@ def scrape_fixtures(url: str) -> list[dict]:
                         "Away Player": away_player,
                         "Away Games": cells[5].get_text(strip=True),
                         "Games": cells[6].get_text(strip=True),
+                        "Area": area,
+                        "Division": division,
+                        "League": league,
                     }
                 )
         except Exception as e:
@@ -138,12 +175,36 @@ def scrape_fixtures(url: str) -> list[dict]:
 
 
 if __name__ == "__main__":
+    session = requests.Session()
+    all_rows = []
     args = parser.parse_args()
+    for league in get_target_leagues():
+        for area in get_target_areas():
+            resp = select_league(session, area, league)
+            divisions = get_division_list(session, area)
+            if not divisions:
+                logger.warning(
+                    "No divisions found for league %s at %s - skipping", league, area
+                )
+                continue
+            for division in divisions:
+                rows = scrape_fixtures(
+                    session,
+                    division["fixture_url"],
+                    area,
+                    division["division"],
+                    league,
+                )
+
+                all_rows.extend(rows)
+                # for result in scrape_fixtures(team["ixture_url"]):
+                # results["area"] = area
+                # results["league"] = league
 
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    df = pd.DataFrame(scrape_fixtures(args.url))
+    df = pd.DataFrame(all_rows)
     df.to_csv(args.output, index=False)
     logger.info("Saved %d rows to %s", len(df), args.output)
 
