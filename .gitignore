@@ -7,3 +7,6 @@ venv
 .claude
 *.py[cod]
 CLAUDE.md
+*.egg-info
+build/
+dist/
