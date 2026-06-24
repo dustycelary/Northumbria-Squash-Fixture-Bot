@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head><title>Northumbria Squash League</title></head>
+<body>
+<!-- showleaguelist options -->
+<select name="compid">
+  <option value="">Select competition...</option>
+  <option value="331">Men's Winter 2024/25</option>
+  <option value="332">Men's Winter 2025/26</option>
+  <option value="333">Ladies Winter 2025/26</option>
+</select>
+
+<!-- showdivlist table — hrefs intentionally use yorkshiresquash domain to prove the bug fix -->
+<table>
+  <tr>
+    <td><a href="https://yorkshiresquash.leaguemaster.co.uk/cgi-county/icounty.exe/showdivfixtures?divisionid=10">Division 1</a></td>
+    <td>8 teams</td>
+    <td>Active</td>
+  </tr>
+  <tr>
+    <td><a href="https://yorkshiresquash.leaguemaster.co.uk/cgi-county/icounty.exe/showdivfixtures?divisionid=11">Division 2</a></td>
+    <td>8 teams</td>
+    <td>Active</td>
+  </tr>
+  <tr>
+    <td><a href="https://yorkshiresquash.leaguemaster.co.uk/cgi-county/icounty.exe/showdivfixtures?divisionid=12">Division 3</a></td>
+    <td>6 teams</td>
+    <td>Active</td>
+  </tr>
+  <tr>
+    <td><a href="/cgi-county/icounty.exe/showteam?teamid=5">Some Team</a></td>
+    <td>unrelated link — should be ignored</td>
+    <td></td>
+  </tr>
+</table>
+</body>
+</html>
